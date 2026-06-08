@@ -1,0 +1,173 @@
+{
+  "name": "📢 Comunicados — Todos os Canais (Webhook)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "comunicado-advogados",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "webhook-comunicado",
+      "name": "📥 Receber Comunicado",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-1100, 500],
+      "webhookId": "comunicado-advogados"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Recebe mensagem + arquivo_url da página HTML\n// e gera 1 item por canal para o Switch rotear\n\nconst body = $input.first().json.body || $input.first().json;\nconst mensagem    = (body.mensagem    || '').trim();\nconst arquivo_url = (body.arquivo_url || '').trim();\nconst arquivo_nome= (body.arquivo_nome|| '').trim();\n\nif (!mensagem) throw new Error('Mensagem vazia.');\n\n// Monta texto final\nlet msgFinal =\n  '📢 **Comunicado Resolvvi**\\n\\n' +\n  mensagem + '\\n\\n';\n\n// Adiciona link do arquivo se existir\nif (arquivo_url) {\n  msgFinal += `📎 **Arquivo:** <${arquivo_url}>\\n\\n`;\n}\n\nmsgFinal += '_Comunicado enviado pela equipe Resolvvi_';\n\nconst CANAIS = [\n  { nome: '💬 Enviar OA (Voos)',       channel_id: '975811908311584778'  },\n  { nome: '💬 Enviar OA (NNI)',        channel_id: '975811982336868372'  },\n  { nome: '💬 Enviar RBA (Voos)',      channel_id: '997191383616065667'  },\n  { nome: '💬 Enviar RBA (NNI/INSS)', channel_id: '997190467617833020'  },\n  { nome: '💬 Enviar Frederico',       channel_id: '968493980549517412'  },\n  { nome: '💬 Enviar Larissa',         channel_id: '968157629274804234'  },\n  { nome: '💬 Enviar Gustavo',         channel_id: '968157578028802108'  },\n  { nome: '💬 Enviar Diego',           channel_id: '973643945865248898'  },\n  { nome: '💬 Enviar Leo Bessa',       channel_id: '979035938049126490'  },\n  { nome: '💬 Enviar Amaral e Castro', channel_id: '988508032277295174'  },\n  { nome: '💬 Enviar Luis Eduardo',    channel_id: '976475800146694214'  },\n  { nome: '💬 Enviar Lira Ventorini',  channel_id: '984862393421148232'  },\n  { nome: '💬 Enviar Julia Jurdi',     channel_id: '1042528566363050014' },\n  { nome: '💬 Enviar Malheiros',       channel_id: '1002621292031258644' },\n  { nome: '💬 Enviar Hannah',          channel_id: '1006248520686239786' },\n  { nome: '💬 Enviar Roberta',         channel_id: '1110190412162924555' },\n  { nome: '💬 Enviar Luis Matheus',    channel_id: '1398300358735827165' },\n  { nome: '💬 Enviar Lucas',           channel_id: '968157924818026536'  },\n  { nome: '💬 Enviar Luciana',         channel_id: '990977013391188028'  },\n  { nome: '💬 Enviar Marcilio',        channel_id: '1398281329053012048' },\n  { nome: '💬 Enviar Igor Garrett',    channel_id: '1432425810425417738' }\n];\n\nreturn CANAIS.map(c => ({\n  json: {\n    channel_id:  c.channel_id,\n    canal_nome:  c.nome,\n    mensagem:    msgFinal\n  }\n}));"
+      },
+      "id": "code-comunicado",
+      "name": "🗃️ Montar Mensagem por Canal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-880, 500]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r1", "leftValue": "={{ $json.channel_id }}", "rightValue": "975811908311584778", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar OA (Voos)" },
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r2", "leftValue": "={{ $json.channel_id }}", "rightValue": "975811982336868372", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar OA (NNI)" },
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r3", "leftValue": "={{ $json.channel_id }}", "rightValue": "997191383616065667", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar RBA (Voos)" },
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r4", "leftValue": "={{ $json.channel_id }}", "rightValue": "997190467617833020", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar RBA (NNI/INSS)" },
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r5", "leftValue": "={{ $json.channel_id }}", "rightValue": "968493980549517412", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar Frederico" },
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r6", "leftValue": "={{ $json.channel_id }}", "rightValue": "968157629274804234", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar Larissa" },
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r7", "leftValue": "={{ $json.channel_id }}", "rightValue": "968157578028802108", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar Gustavo" },
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r8", "leftValue": "={{ $json.channel_id }}", "rightValue": "973643945865248898", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar Diego" },
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r9", "leftValue": "={{ $json.channel_id }}", "rightValue": "979035938049126490", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar Leo Bessa" },
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r10", "leftValue": "={{ $json.channel_id }}", "rightValue": "988508032277295174", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar Amaral e Castro" },
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r11", "leftValue": "={{ $json.channel_id }}", "rightValue": "976475800146694214", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar Luis Eduardo" },
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r12", "leftValue": "={{ $json.channel_id }}", "rightValue": "984862393421148232", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar Lira Ventorini" },
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r13", "leftValue": "={{ $json.channel_id }}", "rightValue": "1042528566363050014", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar Julia Jurdi" },
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r14", "leftValue": "={{ $json.channel_id }}", "rightValue": "1002621292031258644", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar Malheiros" },
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r15", "leftValue": "={{ $json.channel_id }}", "rightValue": "1006248520686239786", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar Hannah" },
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r16", "leftValue": "={{ $json.channel_id }}", "rightValue": "1110190412162924555", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar Roberta" },
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r17", "leftValue": "={{ $json.channel_id }}", "rightValue": "1398300358735827165", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar Luis Matheus" },
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r18", "leftValue": "={{ $json.channel_id }}", "rightValue": "968157924818026536", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar Lucas" },
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r19", "leftValue": "={{ $json.channel_id }}", "rightValue": "990977013391188028", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar Luciana" },
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r20", "leftValue": "={{ $json.channel_id }}", "rightValue": "1398281329053012048", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar Marcilio" },
+            { "conditions": { "options": { "caseSensitive": true }, "conditions": [{ "id": "r21", "leftValue": "={{ $json.channel_id }}", "rightValue": "1432425810425417738", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "💬 Enviar Igor Garrett" }
+          ]
+        },
+        "options": { "fallbackOutput": "none" }
+      },
+      "id": "switch-comunicado",
+      "name": "🔀 Rotear por Canal",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [-660, 500]
+    },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "975811908311584778", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-oa-voos", "name": "💬 Enviar OA (Voos)", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, -800], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "975811982336868372", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-oa-nni", "name": "💬 Enviar OA (NNI)", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, -640], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "997191383616065667", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-rba-voos", "name": "💬 Enviar RBA (Voos)", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, -480], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "997190467617833020", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-rba-nni", "name": "💬 Enviar RBA (NNI/INSS)", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, -320], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "968493980549517412", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-fred", "name": "💬 Enviar Frederico", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, -160], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "968157629274804234", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-larissa", "name": "💬 Enviar Larissa", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, 0], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "968157578028802108", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-gustavo", "name": "💬 Enviar Gustavo", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, 160], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "973643945865248898", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-diego", "name": "💬 Enviar Diego", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, 320], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "979035938049126490", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-leo", "name": "💬 Enviar Leo Bessa", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, 480], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "988508032277295174", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-amaral", "name": "💬 Enviar Amaral e Castro", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, 640], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "976475800146694214", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-luis-edu", "name": "💬 Enviar Luis Eduardo", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, 800], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "984862393421148232", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-lira", "name": "💬 Enviar Lira Ventorini", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, 960], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "1042528566363050014", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-julia", "name": "💬 Enviar Julia Jurdi", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, 1120], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "1002621292031258644", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-malh", "name": "💬 Enviar Malheiros", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, 1280], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "1006248520686239786", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-hannah", "name": "💬 Enviar Hannah", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, 1440], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "1110190412162924555", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-roberta", "name": "💬 Enviar Roberta", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, 1600], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "1398300358735827165", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-luism", "name": "💬 Enviar Luis Matheus", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, 1760], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "968157924818026536", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-lucas", "name": "💬 Enviar Lucas", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, 1920], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "990977013391188028", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-luciana", "name": "💬 Enviar Luciana", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, 2080], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "1398281329053012048", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-marcilio", "name": "💬 Enviar Marcilio", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, 2240], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    { "parameters": { "resource": "message", "guildId": { "__rl": true, "value": "968152606864187463", "mode": "list" }, "channelId": { "__rl": true, "value": "1432425810425417738", "mode": "list" }, "content": "={{ $json.mensagem }}", "options": {} }, "id": "d-igor", "name": "💬 Enviar Igor Garrett", "type": "n8n-nodes-base.discord", "typeVersion": 2, "position": [-400, 2400], "credentials": { "discordBotApi": { "id": "hfJUNPSdd9M6anpZ", "name": "Discord Bot account" } } },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "value": "1Wl_mOUOyjNw1HrdSAvfdluUpAjJBx9T0-NxxKd7YQ90", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "Log Comunicados", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Data":  "={{ $now.toISO() }}",
+            "Canal": "={{ $('🗃️ Montar Mensagem por Canal').item.json.canal_nome }}",
+            "Status":"=✅ Enviado"
+          }
+        },
+        "options": {}
+      },
+      "id": "sheets-comunicado",
+      "name": "📊 Registrar no Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [200, 500],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "J6CSFVdak7w0MXa1", "name": "Google Sheets account 5" } }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"ok\": true}",
+        "options": {}
+      },
+      "id": "respond-ok",
+      "name": "✅ Responder OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [440, 500]
+    }
+  ],
+  "connections": {
+    "📥 Receber Comunicado": { "main": [[{ "node": "🗃️ Montar Mensagem por Canal", "type": "main", "index": 0 }]] },
+    "🗃️ Montar Mensagem por Canal": { "main": [[{ "node": "🔀 Rotear por Canal", "type": "main", "index": 0 }]] },
+    "🔀 Rotear por Canal": { "main": [
+      [{ "node": "💬 Enviar OA (Voos)",       "type": "main", "index": 0 }],
+      [{ "node": "💬 Enviar OA (NNI)",        "type": "main", "index": 0 }],
+      [{ "node": "💬 Enviar RBA (Voos)",      "type": "main", "index": 0 }],
+      [{ "node": "💬 Enviar RBA (NNI/INSS)",  "type": "main", "index": 0 }],
+      [{ "node": "💬 Enviar Frederico",       "type": "main", "index": 0 }],
+      [{ "node": "💬 Enviar Larissa",         "type": "main", "index": 0 }],
+      [{ "node": "💬 Enviar Gustavo",         "type": "main", "index": 0 }],
+      [{ "node": "💬 Enviar Diego",           "type": "main", "index": 0 }],
+      [{ "node": "💬 Enviar Leo Bessa",       "type": "main", "index": 0 }],
+      [{ "node": "💬 Enviar Amaral e Castro", "type": "main", "index": 0 }],
+      [{ "node": "💬 Enviar Luis Eduardo",    "type": "main", "index": 0 }],
+      [{ "node": "💬 Enviar Lira Ventorini",  "type": "main", "index": 0 }],
+      [{ "node": "💬 Enviar Julia Jurdi",     "type": "main", "index": 0 }],
+      [{ "node": "💬 Enviar Malheiros",       "type": "main", "index": 0 }],
+      [{ "node": "💬 Enviar Hannah",          "type": "main", "index": 0 }],
+      [{ "node": "💬 Enviar Roberta",         "type": "main", "index": 0 }],
+      [{ "node": "💬 Enviar Luis Matheus",    "type": "main", "index": 0 }],
+      [{ "node": "💬 Enviar Lucas",           "type": "main", "index": 0 }],
+      [{ "node": "💬 Enviar Luciana",         "type": "main", "index": 0 }],
+      [{ "node": "💬 Enviar Marcilio",        "type": "main", "index": 0 }],
+      [{ "node": "💬 Enviar Igor Garrett",    "type": "main", "index": 0 }]
+    ]},
+    "💬 Enviar OA (Voos)":       { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "💬 Enviar OA (NNI)":        { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "💬 Enviar RBA (Voos)":      { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "💬 Enviar RBA (NNI/INSS)":  { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "💬 Enviar Frederico":       { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "💬 Enviar Larissa":         { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "💬 Enviar Gustavo":         { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "💬 Enviar Diego":           { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "💬 Enviar Leo Bessa":       { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "💬 Enviar Amaral e Castro": { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "💬 Enviar Luis Eduardo":    { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "💬 Enviar Lira Ventorini":  { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "💬 Enviar Julia Jurdi":     { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "💬 Enviar Malheiros":       { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "💬 Enviar Hannah":          { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "💬 Enviar Roberta":         { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "💬 Enviar Luis Matheus":    { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "💬 Enviar Lucas":           { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "💬 Enviar Luciana":         { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "💬 Enviar Marcilio":        { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "💬 Enviar Igor Garrett":    { "main": [[{ "node": "📊 Registrar no Google Sheets", "type": "main", "index": 0 }]] },
+    "📊 Registrar no Google Sheets": { "main": [[{ "node": "✅ Responder OK", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "tags": []
+}
