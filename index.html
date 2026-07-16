@@ -102,7 +102,7 @@
       margin-bottom: .5rem;
     }
 
-    textarea {
+    textarea, input[type="url"] {
       width: 100%;
       background: var(--bg);
       border: 1px solid var(--border);
@@ -112,62 +112,43 @@
       font-family: 'DM Sans', sans-serif;
       font-size: .95rem;
       line-height: 1.6;
-      resize: vertical;
-      min-height: 140px;
       transition: border-color .2s;
       outline: none;
     }
+    textarea { resize: vertical; min-height: 140px; }
+    textarea:focus, input[type="url"]:focus { border-color: var(--accent); }
+    textarea::placeholder, input[type="url"]::placeholder { color: var(--muted); }
 
-    textarea:focus { border-color: var(--accent); }
-    textarea::placeholder { color: var(--muted); }
-
-    .upload-area {
-      border: 1.5px dashed var(--border);
+    /* seletor de público */
+    .segs { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .seg {
+      flex: 1; min-width: 110px;
+      background: var(--bg);
+      border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 1.5rem;
-      text-align: center;
+      padding: .85rem 1rem;
       cursor: pointer;
       transition: border-color .2s, background .2s;
       position: relative;
-      background: var(--bg);
     }
+    .seg:hover { border-color: #3a3f4d; }
+    .seg.on { border-color: var(--accent); background: rgba(239,55,129,.08); }
+    .seg input { position: absolute; opacity: 0; pointer-events: none; }
+    .seg .t { font-family: 'Syne', sans-serif; font-weight: 700; font-size: .95rem; color: var(--text); }
+    .seg .d { font-size: .72rem; color: var(--muted); margin-top: .15rem; letter-spacing: .04em; }
+    .seg.on .d { color: var(--accent); }
 
-    .upload-area:hover, .upload-area.dragover {
-      border-color: var(--accent);
-      background: rgba(79,110,247,.05);
-    }
-
-    .upload-area input[type="file"] {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-      width: 100%;
-      height: 100%;
-    }
-
-    .upload-icon {
-      font-size: 1.5rem;
-      margin-bottom: .5rem;
-    }
-
-    .upload-label {
-      font-size: .875rem;
-      color: var(--muted);
-    }
-
-    .upload-label span {
-      color: var(--accent);
-      font-weight: 500;
-    }
-
-    .file-name {
-      margin-top: .75rem;
+    .preview {
       font-size: .8rem;
-      color: var(--accent);
-      font-weight: 500;
-      display: none;
+      color: var(--muted);
+      line-height: 1.6;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: .85rem 1rem;
     }
+    .preview b { color: var(--accent); font-weight: 600; }
+    .preview .list { margin-top: .35rem; font-size: .74rem; }
 
     .btn {
       width: 100%;
@@ -238,13 +219,14 @@
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce){ *{ animation: none !important; transition: none !important; } }
   </style>
 </head>
 <body>
   <div class="card">
     <div class="logo">Resolvvi · Operações</div>
     <h1>Enviar Comunicado</h1>
-    <p class="subtitle">A mensagem será disparada automaticamente para todos os canais dos advogados parceiros no Discord.</p>
+    <p class="subtitle">Escreva o comunicado, escolha o público e dispare para os canais dos advogados parceiros no Discord.</p>
 
     <form id="form">
       <div class="field">
@@ -253,13 +235,22 @@
       </div>
 
       <div class="field">
-        <label>Arquivo (opcional)</label>
-        <div class="upload-area" id="uploadArea">
-          <input type="file" id="arquivo" accept="*/*">
-          <div class="upload-icon">📎</div>
-          <div class="upload-label"><span>Clique para selecionar</span> ou arraste aqui</div>
-          <div class="file-name" id="fileName"></div>
+        <label>Link do material (opcional)</label>
+        <input type="url" id="material" placeholder="Cole o link do vídeo/PDF (Google Drive, YouTube...)">
+      </div>
+
+      <div class="field">
+        <label>Público</label>
+        <div class="segs" id="segs">
+          <label class="seg on" data-val="all"><input type="checkbox" checked><div class="t">Todos</div><div class="d">21 canais</div></label>
+          <label class="seg" data-val="voos"><input type="checkbox"><div class="t">Voos</div><div class="d">voos</div></label>
+          <label class="seg" data-val="nni"><input type="checkbox"><div class="t">NNI</div><div class="d">nni</div></label>
+          <label class="seg" data-val="inss"><input type="checkbox"><div class="t">INSS</div><div class="d">inss</div></label>
         </div>
+      </div>
+
+      <div class="field">
+        <div class="preview" id="preview"></div>
       </div>
 
       <button class="btn" type="submit" id="btn">Disparar Comunicado 🚀</button>
@@ -268,93 +259,121 @@
     </form>
 
     <hr class="divider">
-    <p class="info">Comunicado enviado pela equipe Resolvvi · Todos os canais ativos</p>
+    <p class="info">Comunicado enviado pela equipe Resolvvi</p>
   </div>
 
   <script>
     // ─── Configuração ───────────────────────────────────────────
-    const WEBHOOK_URL = 'https://n8n.resolvvi.com/webhook-test/comunicado-advogados';
-    // const DRIVE_UPLOAD_URL = ''; // opcional
+    // Produção (funciona com o workflow ATIVO). O antigo /webhook-test/ só
+    // funcionava com o n8n aberto ouvindo evento de teste.
+    const WEBHOOK_URL = 'https://n8n.resolvvi.com/webhook/comunicado-advogados';
 
-    // ─── Upload area drag & drop ────────────────────────────────
-    const uploadArea = document.getElementById('uploadArea');
-    const fileInput  = document.getElementById('arquivo');
-    const fileName   = document.getElementById('fileName');
+    // canal -> produtos (mesmo mapeamento do workflow n8n)
+    const CANAIS = [
+      {n:'OA (Voos)',p:["voos"]},
+      {n:'OA (NNI)',p:["inss", "nni"]},
+      {n:'RBA (Voos)',p:["voos"]},
+      {n:'RBA (NNI/INSS)',p:["inss", "nni"]},
+      {n:'Frederico',p:["inss", "voos"]},
+      {n:'Larissa',p:["voos"]},
+      {n:'Gustavo',p:["voos"]},
+      {n:'Diego',p:["voos"]},
+      {n:'Leo Bessa',p:["voos"]},
+      {n:'Amaral e Castro',p:["voos"]},
+      {n:'Luis Eduardo',p:["voos"]},
+      {n:'Lira Ventorini',p:["inss", "voos"]},
+      {n:'Julia Jurdi',p:["voos"]},
+      {n:'Malheiros',p:["voos"]},
+      {n:'Hannah',p:["voos"]},
+      {n:'Roberta',p:["inss", "voos"]},
+      {n:'Luis Matheus',p:["voos"]},
+      {n:'Lucas',p:["inss", "nni"]},
+      {n:'Luciana',p:["inss", "nni"]},
+      {n:'Marcilio',p:["inss"]},
+      {n:'Igor Garrett',p:["inss"]}
+    ];
 
-    fileInput.addEventListener('change', () => {
-      if (fileInput.files[0]) {
-        fileName.textContent = '✓ ' + fileInput.files[0].name;
-        fileName.style.display = 'block';
+    const segs = document.getElementById('segs');
+    const preview = document.getElementById('preview');
+    const btn = document.getElementById('btn');
+
+    function selecao(){
+      const on = [...segs.querySelectorAll('.seg')].filter(s=>s.classList.contains('on')).map(s=>s.dataset.val);
+      if(on.includes('all')) return ['all'];
+      return on;
+    }
+    function alvos(sel){
+      if(sel.includes('all')) return CANAIS;
+      return CANAIS.filter(c=>c.p.some(p=>sel.includes(p)));
+    }
+    function refresh(){
+      const sel = selecao();
+      if(sel.length===0){ preview.innerHTML='Selecione ao menos um público.'; btn.disabled=true; return; }
+      btn.disabled=false;
+      const list=alvos(sel);
+      const label = sel.includes('all') ? 'Todos' : sel.map(s=>s.toUpperCase()).join(' + ');
+      preview.innerHTML = `Vai para <b>${list.length} ${list.length===1?'canal':'canais'}</b> · ${label}`
+        + `<div class="list">${list.map(c=>c.n).join(' · ')}</div>`;
+      btn.textContent = sel.includes('all') ? 'Disparar para Todos 🚀' : `Disparar para ${label} 🚀`;
+    }
+    segs.addEventListener('click', e=>{
+      const seg=e.target.closest('.seg'); if(!seg) return;
+      e.preventDefault();
+      const val=seg.dataset.val, cb=seg.querySelector('input');
+      if(val==='all'){
+        segs.querySelectorAll('.seg').forEach(s=>{s.classList.remove('on');s.querySelector('input').checked=false;});
+        seg.classList.add('on'); cb.checked=true;
+      }else{
+        const all=segs.querySelector('[data-val=all]');
+        all.classList.remove('on'); all.querySelector('input').checked=false;
+        seg.classList.toggle('on'); cb.checked=seg.classList.contains('on');
+        const anyProd=[...segs.querySelectorAll('.seg')].some(s=>s.dataset.val!=='all'&&s.classList.contains('on'));
+        if(!anyProd){ all.classList.add('on'); all.querySelector('input').checked=true; }
       }
-    });
-
-    ['dragover', 'dragleave', 'drop'].forEach(evt => {
-      uploadArea.addEventListener(evt, e => {
-        e.preventDefault();
-        uploadArea.classList.toggle('dragover', evt === 'dragover');
-        if (evt === 'drop' && e.dataTransfer.files[0]) {
-          fileInput.files = e.dataTransfer.files;
-          fileName.textContent = '✓ ' + e.dataTransfer.files[0].name;
-          fileName.style.display = 'block';
-        }
-      });
+      refresh();
     });
 
     // ─── Submit ─────────────────────────────────────────────────
     document.getElementById('form').addEventListener('submit', async e => {
       e.preventDefault();
-
       const mensagem = document.getElementById('mensagem').value.trim();
-      const arquivo  = fileInput.files[0] || null;
-      const btn      = document.getElementById('btn');
+      const material = document.getElementById('material').value.trim();
+      const sel = selecao();
       const feedback = document.getElementById('feedback');
+      if (!mensagem || sel.length===0) return;
 
-      if (!mensagem) return;
+      const list = alvos(sel);
+      const label = sel.includes('all') ? 'todos os canais' : sel.map(s=>s.toUpperCase()).join(' + ');
+      if (!confirm(`Enviar para ${list.length} ${list.length===1?'canal':'canais'} (${label})?`)) return;
 
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span>Enviando...';
       feedback.style.display = 'none';
 
       try {
-        let arquivo_url = '';
-        let arquivo_nome = '';
-
-        // Se tiver arquivo, envia para webhook de upload do Drive
-        if (arquivo && DRIVE_UPLOAD_URL !== 'COLE_AQUI_URL_WEBHOOK_UPLOAD_DRIVE') {
-          const formData = new FormData();
-          formData.append('file', arquivo);
-          const uploadRes = await fetch(DRIVE_UPLOAD_URL, { method: 'POST', body: formData });
-          const uploadData = await uploadRes.json();
-          arquivo_url  = uploadData.url  || '';
-          arquivo_nome = uploadData.nome || arquivo.name;
-        }
-
-        // Envia comunicado para o n8n
-        const payload = { mensagem, arquivo_url, arquivo_nome };
+        const payload = { mensagem, arquivo_url: material, produtos: sel };
         const res = await fetch(WEBHOOK_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-
-        if (!res.ok) throw new Error('Erro ao enviar.');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
 
         feedback.className = 'feedback success';
-        feedback.textContent = '✅ Comunicado enviado para todos os canais!';
+        feedback.textContent = `✅ Comunicado enviado para ${list.length} ${list.length===1?'canal':'canais'}!`;
         feedback.style.display = 'block';
         document.getElementById('mensagem').value = '';
-        fileInput.value = '';
-        fileName.style.display = 'none';
-
+        document.getElementById('material').value = '';
       } catch (err) {
         feedback.className = 'feedback error';
-        feedback.textContent = '❌ Erro ao enviar. Tente novamente ou contate o suporte.';
+        feedback.textContent = '❌ Erro ao enviar: ' + err.message + '. Verifique se o workflow está ATIVO no n8n.';
         feedback.style.display = 'block';
       }
-
       btn.disabled = false;
-      btn.innerHTML = 'Disparar Comunicado 🚀';
+      refresh();
     });
+
+    refresh();
   </script>
 </body>
 </html>
