@@ -7,354 +7,293 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg:       #0d0f12;
-      --surface:  #151820;
-      --border:   #222530;
-      --accent:   #ef3781;
-      --accent2:  #ef3781;
-      --text:     #fa206d;
-      --muted:    #6b7280;
-      --success:  #10b981;
-      --error:    #ef4444;
+      --bg:#0d0f12; --surface:#151820; --border:#222530; --accent:#ef3781; --accent2:#ef3781;
+      --text:#fa206d; --muted:#6b7280; --success:#10b981; --error:#ef4444;
     }
-
     body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
+      font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh;
+      display:flex; align-items:center; justify-content:center; padding:2rem;
       background-image:
-        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(249, 52, 125, 0.15) 0%, transparent 60%),
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(249,52,125,.15) 0%, transparent 60%),
         radial-gradient(ellipse 60% 40% at 80% 110%, rgba(124,58,237,.12) 0%, transparent 60%);
     }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:3rem; width:100%; max-width:560px;
+      box-shadow:0 32px 80px rgba(0,0,0,.5); animation:fadeUp .5s ease both; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+    .logo { font-family:'Syne',sans-serif; font-size:.75rem; font-weight:700; letter-spacing:.15em; text-transform:uppercase;
+      color:var(--muted); margin-bottom:2rem; display:flex; align-items:center; gap:.5rem; }
+    .logo::before { content:''; display:inline-block; width:8px; height:8px; border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),var(--accent2)); }
+    h1 { font-family:'Syne',sans-serif; font-size:1.75rem; font-weight:800; line-height:1.2; margin-bottom:.5rem;
+      background:linear-gradient(135deg,var(--text) 40%,var(--muted)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+    .subtitle { font-size:.875rem; color:var(--muted); margin-bottom:2.5rem; line-height:1.6; }
+    .field { margin-bottom:1.5rem; }
+    label { display:block; font-size:.8rem; font-weight:500; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); margin-bottom:.5rem; }
+    .hint { font-size:.72rem; color:var(--muted); margin-top:.4rem; line-height:1.5; }
+    textarea, input[type="url"], input[type="password"] {
+      width:100%; background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:1rem; color:var(--text);
+      font-family:'DM Sans',sans-serif; font-size:.95rem; line-height:1.6; transition:border-color .2s; outline:none; }
+    textarea { resize:vertical; min-height:140px; }
+    textarea:focus, input:focus { border-color:var(--accent); }
+    textarea::placeholder, input::placeholder { color:var(--muted); }
+    .contador { font-size:.72rem; color:var(--muted); text-align:right; margin-top:.3rem; }
+    .contador.alto { color:var(--error); }
 
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 3rem;
-      width: 100%;
-      max-width: 560px;
-      box-shadow: 0 32px 80px rgba(0,0,0,.5);
-      animation: fadeUp .5s ease both;
-    }
+    .upload-area { border:1.5px dashed var(--border); border-radius:12px; padding:1.25rem; text-align:center; cursor:pointer;
+      transition:border-color .2s, background .2s; position:relative; background:var(--bg); }
+    .upload-area:hover, .upload-area.dragover { border-color:var(--accent); background:rgba(239,55,129,.05); }
+    .upload-area input[type="file"] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+    .upload-label { font-size:.875rem; color:var(--muted); }
+    .upload-label span { color:var(--accent); font-weight:500; }
+    .thumb { display:none; margin-top:.75rem; align-items:center; justify-content:center; gap:.75rem; }
+    .thumb img { max-height:90px; max-width:160px; border-radius:8px; border:1px solid var(--border); }
+    .thumb button { background:none; border:1px solid var(--border); color:var(--muted); border-radius:8px; padding:.3rem .6rem;
+      font-size:.75rem; cursor:pointer; position:relative; z-index:2; }
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+    .segs { display:flex; flex-wrap:wrap; gap:.5rem; }
+    .seg { flex:1; min-width:96px; background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:.85rem 1rem;
+      cursor:pointer; transition:border-color .2s, background .2s; position:relative; }
+    .seg:hover { border-color:#3a3f4d; }
+    .seg.on { border-color:var(--accent); background:rgba(239,55,129,.08); }
+    .seg input { position:absolute; opacity:0; pointer-events:none; }
+    .seg .t { font-family:'Syne',sans-serif; font-weight:700; font-size:.95rem; color:var(--text); }
+    .seg .d { font-size:.72rem; color:var(--muted); margin-top:.15rem; letter-spacing:.04em; }
+    .seg.on .d { color:var(--accent); }
+    .preview { font-size:.8rem; color:var(--muted); line-height:1.6; background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:.85rem 1rem; }
+    .preview b { color:var(--accent); font-weight:600; }
+    .preview .list { margin-top:.35rem; font-size:.74rem; }
 
-    .logo {
-      font-family: 'Syne', sans-serif;
-      font-size: .75rem;
-      font-weight: 700;
-      letter-spacing: .15em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 2rem;
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-    }
-
-    .logo::before {
-      content: '';
-      display: inline-block;
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-    }
-
-   h1 {
-  font-family: 'Syne', sans-serif;
-  font-size: 1.75rem;
-  font-weight: 800;
-  line-height: 1.2;
-  margin-bottom: .5rem;
-  background: linear-gradient(135deg, var(--text) 40%, var(--muted));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-    .subtitle {
-      font-size: .875rem;
-      color: var(--muted);
-      margin-bottom: 2.5rem;
-      line-height: 1.6;
-    }
-
-    .field { margin-bottom: 1.5rem; }
-
-    label {
-      display: block;
-      font-size: .8rem;
-      font-weight: 500;
-      letter-spacing: .05em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: .5rem;
-    }
-
-    textarea {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1rem;
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: .95rem;
-      line-height: 1.6;
-      resize: vertical;
-      min-height: 140px;
-      transition: border-color .2s;
-      outline: none;
-    }
-
-    textarea:focus { border-color: var(--accent); }
-    textarea::placeholder { color: var(--muted); }
-
-    .upload-area {
-      border: 1.5px dashed var(--border);
-      border-radius: 12px;
-      padding: 1.5rem;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color .2s, background .2s;
-      position: relative;
-      background: var(--bg);
-    }
-
-    .upload-area:hover, .upload-area.dragover {
-      border-color: var(--accent);
-      background: rgba(79,110,247,.05);
-    }
-
-    .upload-area input[type="file"] {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-      width: 100%;
-      height: 100%;
-    }
-
-    .upload-icon {
-      font-size: 1.5rem;
-      margin-bottom: .5rem;
-    }
-
-    .upload-label {
-      font-size: .875rem;
-      color: var(--muted);
-    }
-
-    .upload-label span {
-      color: var(--accent);
-      font-weight: 500;
-    }
-
-    .file-name {
-      margin-top: .75rem;
-      font-size: .8rem;
-      color: var(--accent);
-      font-weight: 500;
-      display: none;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 1rem;
-      border: none;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff;
-      font-family: 'Syne', sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: .03em;
-      cursor: pointer;
-      transition: opacity .2s, transform .1s;
-      margin-top: .5rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn:hover { opacity: .9; }
-    .btn:active { transform: scale(.98); }
-    .btn:disabled { opacity: .5; cursor: not-allowed; }
-
-    .feedback {
-      margin-top: 1.25rem;
-      padding: .875rem 1rem;
-      border-radius: 10px;
-      font-size: .875rem;
-      font-weight: 500;
-      display: none;
-      animation: fadeUp .3s ease both;
-    }
-
-    .feedback.success {
-      background: rgba(16,185,129,.1);
-      border: 1px solid rgba(16,185,129,.3);
-      color: var(--success);
-    }
-
-    .feedback.error {
-      background: rgba(239,68,68,.1);
-      border: 1px solid rgba(239,68,68,.3);
-      color: var(--error);
-    }
-
-    .divider {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 2rem 0;
-    }
-
-    .info {
-      font-size: .78rem;
-      color: var(--muted);
-      line-height: 1.6;
-      text-align: center;
-    }
-
-    .spinner {
-      display: inline-block;
-      width: 16px; height: 16px;
-      border: 2px solid rgba(255,255,255,.3);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin .6s linear infinite;
-      vertical-align: middle;
-      margin-right: .5rem;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn { width:100%; padding:1rem; border:none; border-radius:12px; background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#fff; font-family:'Syne',sans-serif; font-size:1rem; font-weight:700; letter-spacing:.03em; cursor:pointer;
+      transition:opacity .2s, transform .1s; margin-top:.5rem; }
+    .btn:hover { opacity:.9; } .btn:active { transform:scale(.98); } .btn:disabled { opacity:.5; cursor:not-allowed; }
+    .feedback { margin-top:1.25rem; padding:.875rem 1rem; border-radius:10px; font-size:.875rem; font-weight:500; display:none; animation:fadeUp .3s ease both; line-height:1.5; }
+    .feedback.success { background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.3); color:var(--success); }
+    .feedback.error { background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.3); color:var(--error); }
+    .divider { border:none; border-top:1px solid var(--border); margin:2rem 0; }
+    .info { font-size:.78rem; color:var(--muted); line-height:1.6; text-align:center; }
+    .spinner { display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,.3); border-top-color:#fff; border-radius:50%;
+      animation:spin .6s linear infinite; vertical-align:middle; margin-right:.5rem; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
   </style>
 </head>
 <body>
   <div class="card">
     <div class="logo">Resolvvi · Operações</div>
     <h1>Enviar Comunicado</h1>
-    <p class="subtitle">A mensagem será disparada automaticamente para todos os canais dos advogados parceiros no Discord.</p>
+    <p class="subtitle">Escreva o comunicado, escolha o público e dispare para os canais dos advogados parceiros no Discord.</p>
 
     <form id="form">
       <div class="field">
-        <label>Mensagem *</label>
+        <label for="mensagem">Mensagem *</label>
         <textarea id="mensagem" placeholder="Digite o comunicado aqui..." required></textarea>
+        <div class="contador" id="contador">0 / 1800</div>
       </div>
 
       <div class="field">
-        <label>Arquivo (opcional)</label>
+        <label>Imagem ou GIF (opcional)</label>
         <div class="upload-area" id="uploadArea">
-          <input type="file" id="arquivo" accept="*/*">
-          <div class="upload-icon">📎</div>
+          <input type="file" id="imagem" accept="image/png,image/jpeg,image/gif,image/webp">
           <div class="upload-label"><span>Clique para selecionar</span> ou arraste aqui</div>
-          <div class="file-name" id="fileName"></div>
+          <div class="thumb" id="thumb"><img id="thumbImg" alt="Prévia da imagem"><button type="button" id="tirar">Remover</button></div>
+        </div>
+        <div class="hint">PNG, JPG, GIF ou WEBP, até 8 MB. Vai como anexo na mensagem.</div>
+      </div>
+
+      <div class="field">
+        <label for="material">Link do material (opcional)</label>
+        <input type="url" id="material" placeholder="Cole o link do vídeo/PDF (Google Drive, YouTube...)">
+        <div class="hint">Aceita Google Drive/Docs, YouTube, Notion e resolvvi.com, sempre com https.</div>
+      </div>
+
+      <div class="field">
+        <label>Público</label>
+        <div class="segs" id="segs">
+          <label class="seg on" data-val="all"><input type="checkbox" checked><div class="t">Todos</div><div class="d" id="dTodos">canais</div></label>
+          <label class="seg" data-val="voos"><input type="checkbox"><div class="t">Voos</div><div class="d">voos</div></label>
+          <label class="seg" data-val="nni"><input type="checkbox"><div class="t">NNI</div><div class="d">nni</div></label>
+          <label class="seg" data-val="inss"><input type="checkbox"><div class="t">INSS</div><div class="d">inss</div></label>
+          <label class="seg" data-val="brs"><input type="checkbox"><div class="t">BRS</div><div class="d">redes sociais</div></label>
+          <label class="seg" data-val="teste"><input type="checkbox"><div class="t">🧪 Teste</div><div class="d">só teste-sabes</div></label>
         </div>
       </div>
 
-      <button class="btn" type="submit" id="btn">Disparar Comunicado 🚀</button>
+      <div class="field"><div class="preview" id="preview"></div></div>
 
+      <div class="field">
+        <label for="senha">Senha de envio *</label>
+        <input type="password" id="senha" autocomplete="current-password" placeholder="Senha que a equipe recebeu" required>
+        <div class="hint">A senha não fica salva nesta página: digite a cada vez que abrir.</div>
+      </div>
+
+      <button class="btn" type="submit" id="btn">Disparar Comunicado 🚀</button>
       <div class="feedback" id="feedback"></div>
     </form>
 
     <hr class="divider">
-    <p class="info">Comunicado enviado pela equipe Resolvvi · Todos os canais ativos</p>
+    <p class="info">Comunicado enviado pela equipe Resolvvi</p>
   </div>
 
   <script>
     // ─── Configuração ───────────────────────────────────────────
-    const WEBHOOK_URL = 'COLE_AQUI_A_URL_DO_WEBHOOK_N8N';
-    const DRIVE_UPLOAD_URL = 'COLE_AQUI_URL_WEBHOOK_UPLOAD_DRIVE'; // opcional
+    const WEBHOOK_URL = 'https://n8n.resolvvi.com/webhook/comunicado-advogados';
+    const USUARIO = 'comunicados';   // usuário da Credential Basic Auth no n8n. A SENHA nunca vai neste arquivo.
+    const MAX_CARACTERES = 1800;
+    const MAX_MB = 8;
+    const TIPOS = ['image/png','image/jpeg','image/gif','image/webp'];
 
-    // ─── Upload area drag & drop ────────────────────────────────
-    const uploadArea = document.getElementById('uploadArea');
-    const fileInput  = document.getElementById('arquivo');
-    const fileName   = document.getElementById('fileName');
+    // canal -> produtos (MESMA lista do nó 🛡️ Validar e Montar no n8n)
+    const CANAIS = [
+      {n:'OA (Voos)',p:["voos"]},
+      {n:'OA (NNI)',p:["inss","nni"]},
+      {n:'RBA (Voos)',p:["voos"]},
+      {n:'RBA (NNI/INSS)',p:["inss","nni"]},
+      {n:'Frederico',p:["inss","voos"]},
+      {n:'Larissa',p:["voos"]},
+      {n:'Gustavo',p:["voos"]},
+      {n:'Diego',p:["voos"]},
+      {n:'Leo Bessa',p:["voos"]},
+      {n:'Amaral e Castro',p:["voos"]},
+      {n:'Luis Eduardo',p:["voos"]},
+      {n:'Lira Ventorini',p:["inss","voos"]},
+      {n:'Julia Jurdi',p:["voos"]},
+      {n:'Malheiros',p:["voos"]},
+      {n:'Hannah',p:["voos"]},
+      {n:'Roberta',p:["inss","voos"]},
+      {n:'Luis Matheus',p:["voos"]},
+      {n:'Lucas',p:["inss","nni"]},
+      {n:'Luciana',p:["inss","nni"]},
+      {n:'Marcilio',p:["inss"]},
+      {n:'Igor Garrett',p:["inss"]},
+      {n:'OA Novas Áreas (BRS)',p:["brs"]},
+      {n:'Matheus Carvalho',p:["brs"]},
+      {n:'Breno Marcos',p:["brs"]},
+      {n:'RBA (BRS)',p:["brs"]},
+      {n:'Teste (teste-sabes)',p:["teste"]}      // só no público Teste, nunca no Todos
+    ];
 
-    fileInput.addEventListener('change', () => {
-      if (fileInput.files[0]) {
-        fileName.textContent = '✓ ' + fileInput.files[0].name;
-        fileName.style.display = 'block';
-      }
+    const $ = id => document.getElementById(id);
+    const segs = $('segs'), preview = $('preview'), btn = $('btn'), feedback = $('feedback');
+    const fileInput = $('imagem'), thumb = $('thumb'), thumbImg = $('thumbImg');
+    $('dTodos').textContent = alvos(['all']).length + ' canais';
+
+    // ─── Contador de caracteres ─────────────────────────────────
+    const msg = $('mensagem'), contador = $('contador');
+    msg.addEventListener('input', () => {
+      contador.textContent = msg.value.length + ' / ' + MAX_CARACTERES;
+      contador.classList.toggle('alto', msg.value.length > MAX_CARACTERES);
     });
 
-    ['dragover', 'dragleave', 'drop'].forEach(evt => {
-      uploadArea.addEventListener(evt, e => {
-        e.preventDefault();
-        uploadArea.classList.toggle('dragover', evt === 'dragover');
-        if (evt === 'drop' && e.dataTransfer.files[0]) {
-          fileInput.files = e.dataTransfer.files;
-          fileName.textContent = '✓ ' + e.dataTransfer.files[0].name;
-          fileName.style.display = 'block';
-        }
-      });
-    });
-
-    // ─── Submit ─────────────────────────────────────────────────
-    document.getElementById('form').addEventListener('submit', async e => {
+    // ─── Imagem ─────────────────────────────────────────────────
+    function aviso(tipo, texto){ feedback.className = 'feedback ' + tipo; feedback.textContent = texto; feedback.style.display = 'block'; }
+    function limparImagem(){ fileInput.value = ''; thumb.style.display = 'none'; thumbImg.removeAttribute('src'); }
+    function mostrarImagem(f){
+      if (!f) return limparImagem();
+      if (!TIPOS.includes(f.type)) { limparImagem(); return aviso('error', '❌ O anexo precisa ser PNG, JPG, GIF ou WEBP.'); }
+      if (f.size > MAX_MB * 1024 * 1024) { limparImagem(); return aviso('error', '❌ Imagem acima de ' + MAX_MB + ' MB.'); }
+      feedback.style.display = 'none';
+      thumbImg.src = URL.createObjectURL(f);
+      thumb.style.display = 'flex';
+    }
+    fileInput.addEventListener('change', () => mostrarImagem(fileInput.files[0]));
+    $('tirar').addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); limparImagem(); });
+    const uploadArea = $('uploadArea');
+    ['dragover','dragleave','drop'].forEach(evt => uploadArea.addEventListener(evt, e => {
       e.preventDefault();
+      uploadArea.classList.toggle('dragover', evt === 'dragover');
+      if (evt === 'drop' && e.dataTransfer.files[0]) { fileInput.files = e.dataTransfer.files; mostrarImagem(fileInput.files[0]); }
+    }));
 
-      const mensagem = document.getElementById('mensagem').value.trim();
-      const arquivo  = fileInput.files[0] || null;
-      const btn      = document.getElementById('btn');
-      const feedback = document.getElementById('feedback');
+    // ─── Público ────────────────────────────────────────────────
+    function selecao(){
+      const on = [...segs.querySelectorAll('.seg')].filter(s => s.classList.contains('on')).map(s => s.dataset.val);
+      return on.includes('all') ? ['all'] : on;
+    }
+    function alvos(sel){ return sel.includes('all') ? CANAIS.filter(c => !c.p.includes('teste')) : CANAIS.filter(c => c.p.some(p => sel.includes(p))); }
+    function rotulo(sel){ return sel.includes('all') ? 'Todos' : sel.map(s => s.toUpperCase()).join(' + '); }
+    function refresh(){
+      const sel = selecao();
+      if (sel.length === 0) { preview.textContent = 'Selecione ao menos um público.'; btn.disabled = true; return; }
+      btn.disabled = false;
+      const list = alvos(sel);
+      preview.innerHTML = 'Vai para <b>' + list.length + ' ' + (list.length === 1 ? 'canal' : 'canais') + '</b> · ' + rotulo(sel)
+        + '<div class="list">' + list.map(c => c.n).join(' · ') + '</div>';
+      btn.textContent = sel.includes('all') ? 'Disparar para Todos 🚀' : 'Disparar para ' + rotulo(sel) + ' 🚀';
+    }
+    segs.addEventListener('click', e => {
+      const seg = e.target.closest('.seg'); if (!seg) return;
+      e.preventDefault();
+      const all = segs.querySelector('[data-val=all]');
+      if (seg.dataset.val === 'all') {
+        segs.querySelectorAll('.seg').forEach(s => { s.classList.remove('on'); s.querySelector('input').checked = false; });
+        seg.classList.add('on'); seg.querySelector('input').checked = true;
+      } else {
+        all.classList.remove('on'); all.querySelector('input').checked = false;
+        seg.classList.toggle('on'); seg.querySelector('input').checked = seg.classList.contains('on');
+        const algum = [...segs.querySelectorAll('.seg')].some(s => s.dataset.val !== 'all' && s.classList.contains('on'));
+        if (!algum) { all.classList.add('on'); all.querySelector('input').checked = true; }
+      }
+      refresh();
+    });
 
-      if (!mensagem) return;
+    // ─── Envio ──────────────────────────────────────────────────
+    function basicAuth(usuario, senha){
+      const bytes = new TextEncoder().encode(usuario + ':' + senha);   // aceita acento na senha
+      return 'Basic ' + btoa(String.fromCharCode(...bytes));
+    }
+
+    $('form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const mensagem = msg.value.trim();
+      const material = $('material').value.trim();
+      const senha = $('senha').value;
+      const imagem = fileInput.files[0] || null;
+      const sel = selecao();
+      if (!mensagem || sel.length === 0) return;
+      if (!senha) return aviso('error', '❌ Digite a senha de envio.');
+      if (mensagem.length > MAX_CARACTERES) return aviso('error', '❌ Mensagem acima de ' + MAX_CARACTERES + ' caracteres.');
+
+      const list = alvos(sel);
+      const extra = imagem ? ' com imagem' : '';
+      if (!confirm('Enviar' + extra + ' para ' + list.length + ' ' + (list.length === 1 ? 'canal' : 'canais') + ' (' + rotulo(sel) + ')?')) return;
 
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner"></span>Enviando...';
       feedback.style.display = 'none';
 
       try {
-        let arquivo_url = '';
-        let arquivo_nome = '';
+        const dados = new FormData();
+        dados.append('mensagem', mensagem);
+        dados.append('arquivo_url', material);
+        dados.append('produtos', JSON.stringify(sel));
+        if (imagem) dados.append('imagem', imagem, imagem.name);
 
-        // Se tiver arquivo, envia para webhook de upload do Drive
-        if (arquivo && DRIVE_UPLOAD_URL !== 'COLE_AQUI_URL_WEBHOOK_UPLOAD_DRIVE') {
-          const formData = new FormData();
-          formData.append('file', arquivo);
-          const uploadRes = await fetch(DRIVE_UPLOAD_URL, { method: 'POST', body: formData });
-          const uploadData = await uploadRes.json();
-          arquivo_url  = uploadData.url  || '';
-          arquivo_nome = uploadData.nome || arquivo.name;
+        // Sem Content-Type manual: o navegador monta o multipart com o boundary certo.
+        const res = await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Authorization': basicAuth(USUARIO, senha) }, body: dados });
+
+        if (res.status === 401 || res.status === 403) throw new Error('Senha incorreta.');
+        let r = {};
+        try { r = await res.json(); } catch (_) {}
+        if (res.status === 400) throw new Error(r.motivo || 'Pedido recusado pelo n8n.');
+        if (!res.ok) throw new Error('HTTP ' + res.status + '. Verifique se o workflow está ATIVO no n8n.');
+
+        if (r.falhas && r.falhas.length) {
+          aviso('error', '⚠️ Enviado para ' + r.enviados + ' de ' + r.total + ' canais. Falhou em: ' + r.falhas.join(', ') + '. Veja o Log Comunicados.');
+        } else {
+          aviso('success', '✅ Comunicado enviado para ' + (r.enviados || list.length) + ' ' + ((r.enviados || list.length) === 1 ? 'canal' : 'canais') + '!');
+          msg.value = ''; $('material').value = ''; limparImagem();
+          contador.textContent = '0 / ' + MAX_CARACTERES;
         }
-
-        // Envia comunicado para o n8n
-        const payload = { mensagem, arquivo_url, arquivo_nome };
-        const res = await fetch(WEBHOOK_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) throw new Error('Erro ao enviar.');
-
-        feedback.className = 'feedback success';
-        feedback.textContent = '✅ Comunicado enviado para todos os canais!';
-        feedback.style.display = 'block';
-        document.getElementById('mensagem').value = '';
-        fileInput.value = '';
-        fileName.style.display = 'none';
-
       } catch (err) {
-        feedback.className = 'feedback error';
-        feedback.textContent = '❌ Erro ao enviar. Tente novamente ou contate o suporte.';
-        feedback.style.display = 'block';
+        aviso('error', '❌ ' + err.message);
       }
-
       btn.disabled = false;
-      btn.innerHTML = 'Disparar Comunicado 🚀';
+      refresh();
     });
+
+    refresh();
   </script>
 </body>
 </html>
